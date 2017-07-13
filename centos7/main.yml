@@ -1,0 +1,5 @@
+#- hosts: sonar
+ - hosts: localhost
+   roles:
+    #- postgres-sql
+    - sonarqube

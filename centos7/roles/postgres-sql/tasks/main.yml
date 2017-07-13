@@ -1,0 +1,30 @@
+
+- name: install postgres latest using yum
+  yum:
+    name: postgresql-server
+    state: latest
+- name: postgres contir
+  yum: 
+     name: postgresql-contrib
+     state: latest
+- name: Postgres setup initdb
+  shell:  postgresql-setup initdb
+- name: changing pg_hba
+  shell: echo "host   all   all    0.0.0.0/0   md5" >>/var/lib/pgsql/data/pg_hba.conf
+- name: changeing intend to md5
+  shell: sed -i "s/\bident\b/md5/g" /var/lib/pgsql/data/pg_hba.conf
+- name: change peer to trust
+  shell: sed -i "s/\bpeer\b/trust/g" /var/lib/pgsql/data/pg_hba.conf
+- name: install wget
+  yum:
+    name: wget
+    state: latest
+- name: install git
+  yum:
+    name: git
+    state: latest
+
+  notify:
+       - start postgresql
+       - enable postgresql
+

@@ -1,0 +1,119 @@
+- name: install wget
+  yum:
+    name: wget
+    state: latest
+  ignore_errors: true
+  become: yes
+- name: Download JDK rpm file
+  shell:  wget --no-cookies --no-check-certificate --header "Cookie:oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jdk-8u131-linux-x64.rpm"
+  become: yes
+
+- name: install jdk
+  yum:
+     name: jdk-8u131-linux-x64.rpm
+     state: latest
+  ignore_errors: true
+  become: yes
+
+- name: create database sonar
+  shell:  psql -d template1 -c "CREATE DATABASE sonarqube;"
+  become: yes
+  become_user: postgres
+  ignore_errors: true
+
+- name: create user sonar
+  shell:  psql -d template1 -c "CREATE USER sonar WITH PASSWORD 'sonar';"
+  become: yes
+  become_user: postgres
+  ignore_errors: true
+
+- name: Grant Privileges
+  shell:  psql -d template1 -c "GRANT ALL PRIVILEGES ON DATABASE sonarqube TO sonar;"
+  become: yes
+  become_user: postgres
+  ignore_errors: true
+
+- name: install unzip
+  yum:
+    name: unzip
+    state: latest
+  become: yes
+  ignore_errors: true
+
+- name: install git
+  yum:
+    name: git
+    state: latest
+  become: yes
+  ignore_errors: true
+- name: download the sonarqube 6.4
+  shell: wget https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-6.4.zip
+- name: remove the sonarqube previous
+  shell: rm -rf /opt/sonarqube-6.4
+  ignore_errors: true
+  become: true
+- name: unzip the sonarqube
+  shell: unzip sonarqube-6.4.zip -d /opt
+  become: yes
+- name: rm previous sonarqube
+  shell: rm -rf /opt/sonarqube
+  become: yes
+  ignore_errors: true
+  
+- name: move this directory
+  shell: mv /opt/sonarqube-6.4 /opt/sonarqube
+  become: yes
+
+- name: copy the Dockerfile in target location
+  copy:
+    src: static_files/sonar.service
+    dest: /etc/systemd/system/sonar.service
+    mode: 0777
+  become: yes
+
+- name: changing username in sonar.properties
+  lineinfile:
+     path: /opt/sonarqube/conf/sonar.properties
+     regexp: '#sonar.jdbc.username='
+     line: 'sonar.jdbc.username=sonar'
+     mode: 0644
+  become: yes
+
+- name: changing password sonar.properties
+  lineinfile:
+     path: /opt/sonarqube/conf/sonar.properties
+     regexp: '#sonar.jdbc.password='
+     line: 'sonar.jdbc.password=sonar'
+     mode: 0644
+  become: yes
+- name: changing host in sonar.properties
+  lineinfile:
+     path: /opt/sonarqube/conf/sonar.properties
+     regexp: '#sonar.web.host=0.0.0.0'
+     line: 'sonar.web.host=0.0.0.0'
+     mode: 0644
+  become: yes
+- name: changing port sonar.properties
+  lineinfile:
+     path: /opt/sonarqube/conf/sonar.properties
+     regexp: '#sonar.web.port=9000'
+     line: 'sonar.web.port=9000'
+     mode: 0644
+  become: yes
+
+
+- name: changing jdbc usr sonar.properties
+  lineinfile:
+     path: /opt/sonarqube/conf/sonar.properties
+     regexp: '#sonar.jdbc.url=jdbc:postgresql://localhost/sonar'
+     line: 'sonar.jdbc.url=jdbc:postgresql://localhost/sonarqube'
+     mode: 0644
+  notify:
+        - start sonar
+  become: yes
+
+- name: delete rpm file
+  shell: rm -rf jdk-8u131-linux-x64.rpm
+- name: delete zip file
+  shell: rm -rf sonarqube-6.4.zip  
+
