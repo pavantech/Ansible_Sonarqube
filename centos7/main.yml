@@ -1,5 +1,5 @@
 #- hosts: sonar
  - hosts: localhost
    roles:
-    #- postgres-sql
-    - sonarqube
+    - {role: postgres-sql, become: true}
+    - {role: sonarqube, become: true}

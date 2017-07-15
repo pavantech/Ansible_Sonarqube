@@ -108,9 +108,10 @@
      regexp: '#sonar.jdbc.url=jdbc:postgresql://localhost/sonar'
      line: 'sonar.jdbc.url=jdbc:postgresql://localhost/sonarqube'
      mode: 0644
-  notify:
-        - start sonar
-  become: yes
+
+- name: checking started sonar
+  shell: service sonar start
+
 - name: checking started sonar
   shell: service sonar status
   register: message
