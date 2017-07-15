@@ -64,7 +64,7 @@
   shell: mv /opt/sonarqube-6.4 /opt/sonarqube
   become: yes
 
-- name: copy the Dockerfile in target location
+- name: copy the sonar.service in target location
   copy:
     src: static_files/sonar.service
     dest: /etc/systemd/system/sonar.service
