@@ -111,7 +111,12 @@
   notify:
         - start sonar
   become: yes
-
+- name: checking started sonar
+  shell: service sonar status
+  register: message
+- debug:
+      var: message
+      
 - name: delete rpm file
   shell: rm -rf jdk-8u131-linux-x64.rpm
 - name: delete zip file
