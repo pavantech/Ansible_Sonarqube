@@ -29,7 +29,7 @@
   shell: systemctl start  postgresql.service
 - name: service enable
   shell: systemctl enable  postgresql.service
-- name: checking started jenkins
+- name: checking started postgres
   shell: systemctl status postgresql
   register: message
 - debug:
