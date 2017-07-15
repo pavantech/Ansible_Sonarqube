@@ -9,6 +9,7 @@
      state: latest
 - name: Postgres setup initdb
   shell:  postgresql-setup initdb
+  ignore_errors: yes
 - name: changing pg_hba
   shell: echo "host   all   all    0.0.0.0/0   md5" >>/var/lib/pgsql/data/pg_hba.conf
 - name: changeing intend to md5
@@ -24,7 +25,18 @@
     name: git
     state: latest
 
-  notify:
-       - start postgresql
-       - enable postgresql
+- name: service start
+  shell: systemctl start  postgresql.service
+- name: service enable
+  shell: systemctl enable  postgresql.service
+- name: checking started jenkins
+  shell: systemctl status postgresql
+  register: message
+- debug:
+      var: message
+- name: change user password postgres
+  shell:  psql -d template1 -c "ALTER USER postgres PASSWORD 'postgres';"
+  become: yes
+  become_user: postgres
+  ignore_errors: true
 
